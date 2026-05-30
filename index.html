@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Review Copy</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap");
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0e0c0a;
+        --sidebar-bg: #141210;
+        --panel-bg: #181512;
+        --accent: #c9a96e;
+        --accent-dim: #8a6f44;
+        --text: #e8ddd0;
+        --text-muted: #7a6e64;
+        --border: #2a2520;
+        --hover: #1f1c18;
+        --active: #252018;
+        --sidebar-width: 300px;
+        --header-height: 56px;
+        --bottom-nav-height: 60px;
+      }
+
+      html,
+      body {
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        overflow: hidden;
+      }
+
+      /* ── HEADER ── */
+      header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--header-height);
+        background: var(--sidebar-bg);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        gap: 12px;
+        z-index: 200;
+      }
+
+      .logo {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--accent);
+        letter-spacing: 0.03em;
+        white-space: nowrap;
+      }
+
+      .header-divider {
+        width: 1px;
+        height: 20px;
+        background: var(--border);
+        flex-shrink: 0;
+      }
+
+      .header-subtitle {
+        font-size: 11px;
+        color: var(--text-muted);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .header-badge {
+        margin-left: auto;
+        flex-shrink: 0;
+        padding: 4px 10px;
+        border: 1px solid var(--accent-dim);
+        border-radius: 20px;
+        font-size: 10px;
+        color: var(--accent-dim);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        color: var(--text);
+        font-size: 22px;
+        cursor: pointer;
+        padding: 4px;
+        flex-shrink: 0;
+        line-height: 1;
+      }
+
+      /* ── LAYOUT ── */
+      .layout {
+        display: flex;
+        height: 100vh;
+        padding-top: var(--header-height);
+      }
+
+      /* ── SIDEBAR ── */
+      aside {
+        width: var(--sidebar-width);
+        min-width: var(--sidebar-width);
+        background: var(--sidebar-bg);
+        border-right: 1px solid var(--border);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+      }
+
+      aside::-webkit-scrollbar {
+        width: 4px;
+      }
+      aside::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      aside::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+      }
+
+      .sidebar-header {
+        padding: 16px 20px 12px;
+        font-size: 10px;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 0;
+        background: var(--sidebar-bg);
+        z-index: 10;
+      }
+
+      .doc-list {
+        list-style: none;
+        padding: 8px 0;
+        flex: 1;
+      }
+      .doc-list li {
+        position: relative;
+      }
+
+      .doc-list li button {
+        width: 100%;
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-align: left;
+        padding: 11px 20px 11px 40px;
+        color: var(--text-muted);
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        line-height: 1.4;
+        transition:
+          background 0.15s,
+          color 0.15s;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .doc-list li button:hover {
+        background: var(--hover);
+        color: var(--text);
+      }
+      .doc-list li.active button {
+        background: var(--active);
+        color: var(--accent);
+      }
+
+      .doc-list li.active::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: var(--accent);
+        border-radius: 0 2px 2px 0;
+      }
+
+      .doc-icon {
+        flex-shrink: 0;
+        margin-top: 2px;
+        opacity: 0.4;
+        font-size: 10px;
+      }
+      .doc-list li.active .doc-icon {
+        opacity: 1;
+      }
+
+      .doc-num {
+        position: absolute;
+        left: 14px;
+        top: 13px;
+        font-size: 10px;
+        color: var(--border);
+        font-variant-numeric: tabular-nums;
+      }
+      .doc-list li.active .doc-num {
+        color: var(--accent-dim);
+      }
+
+      /* ── MAIN ── */
+      main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        min-width: 0;
+      }
+
+      .viewer-header {
+        padding: 10px 20px;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--panel-bg);
+        flex-shrink: 0;
+      }
+
+      .viewer-title {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text);
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .page-info {
+        font-size: 11px;
+        color: var(--text-muted);
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+
+      .viewer-meta {
+        font-size: 10px;
+        color: var(--text-muted);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        flex-shrink: 0;
+      }
+
+      /* ── PDF SCROLL ── */
+      #pdf-scroll {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        background: #1a1714;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px 16px;
+        gap: 10px;
+      }
+
+      #pdf-scroll::-webkit-scrollbar {
+        width: 6px;
+      }
+      #pdf-scroll::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      #pdf-scroll::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+      }
+
+      #pdf-scroll canvas {
+        display: block;
+        max-width: 100%;
+        height: auto;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+      }
+
+      /* ── LOADING ── */
+      #pdf-loading {
+        flex: 1;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .spinner {
+        width: 32px;
+        height: 32px;
+        border: 2px solid var(--border);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-text {
+        font-size: 13px;
+        color: var(--text-muted);
+        letter-spacing: 0.06em;
+      }
+
+      /* ── ERROR ── */
+      #pdf-error {
+        flex: 1;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 12px;
+        padding: 24px;
+        text-align: center;
+      }
+
+      .error-icon {
+        font-size: 36px;
+        opacity: 0.4;
+      }
+      .error-title {
+        font-family: "Cormorant Garamond", serif;
+        font-size: 18px;
+        font-style: italic;
+        color: var(--text-muted);
+      }
+      .error-file {
+        font-size: 11px;
+        color: var(--accent-dim);
+        font-family: monospace;
+        background: var(--border);
+        padding: 4px 10px;
+        border-radius: 4px;
+        word-break: break-all;
+      }
+
+      /* ── MOBILE BOTTOM NAV ── */
+      .bottom-nav {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: var(--bottom-nav-height);
+        background: var(--sidebar-bg);
+        border-top: 1px solid var(--border);
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        z-index: 200;
+        gap: 12px;
+      }
+
+      .nav-btn {
+        background: none;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        font-size: 12px;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: "DM Sans", sans-serif;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+
+      .nav-btn:hover {
+        border-color: var(--accent-dim);
+        color: var(--accent);
+      }
+      .nav-btn:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+
+      .nav-doc-label {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-align: center;
+        flex: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* ── SIDEBAR OVERLAY (mobile) ── */
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 149;
+      }
+      .sidebar-overlay.visible {
+        display: block;
+      }
+
+      /* ── TABLET ── */
+      @media (max-width: 1024px) {
+        :root {
+          --sidebar-width: 240px;
+        }
+        .header-subtitle {
+          display: none;
+        }
+        .header-divider {
+          display: none;
+        }
+      }
+
+      /* ── MOBILE ── */
+      @media (max-width: 768px) {
+        :root {
+          --sidebar-width: 280px;
+        }
+        .menu-toggle {
+          display: block;
+        }
+        .header-subtitle {
+          display: none;
+        }
+        .header-divider {
+          display: none;
+        }
+
+        aside {
+          position: fixed;
+          top: var(--header-height);
+          left: 0;
+          bottom: 0;
+          z-index: 150;
+          transform: translateX(-100%);
+          transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+          width: var(--sidebar-width);
+          min-width: unset;
+        }
+        aside.open {
+          transform: translateX(0);
+        }
+        main {
+          width: 100%;
+        }
+        #pdf-scroll {
+          padding-bottom: calc(var(--bottom-nav-height) + 16px);
+        }
+        .bottom-nav {
+          display: flex;
+        }
+        .viewer-header {
+          padding: 8px 14px;
+        }
+        .viewer-meta {
+          display: none;
+        }
+        #pdf-scroll {
+          padding: 12px 8px;
+        }
+        #pdf-scroll canvas {
+          width: 100% !important;
+        }
+      }
+
+      /* ── SMALL MOBILE ── */
+      @media (max-width: 480px) {
+        .logo {
+          font-size: 15px;
+        }
+        .header-badge {
+          display: none;
+        }
+        #pdf-scroll {
+          padding: 8px 4px;
+          gap: 6px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <button
+        class="menu-toggle"
+        id="menu-toggle"
+        onclick="toggleSidebar()"
+        aria-label="Toggle menu"
+      >
+        ☰
+      </button>
+      <span class="logo">Crossed Hearts Digital Library</span>
+      <div class="header-divider"></div>
+      <span class="header-subtitle">Review Copy — Executioner</span>
+      <span class="header-badge">Review Only</span>
+    </header>
+
+    <div
+      class="sidebar-overlay"
+      id="sidebar-overlay"
+      onclick="closeSidebar()"
+    ></div>
+
+    <div class="layout">
+      <aside id="sidebar">
+        <div class="sidebar-header">Documents &nbsp;·&nbsp; 6 files</div>
+        <ul class="doc-list" id="doc-list"></ul>
+      </aside>
+
+      <main>
+        <div class="viewer-header">
+          <span class="viewer-title" id="viewer-title">Loading…</span>
+          <span class="page-info" id="page-info"></span>
+          <span class="viewer-meta">PDF · Read Only</span>
+        </div>
+
+        <div id="pdf-loading">
+          <div class="spinner"></div>
+          <span class="loading-text">Loading document…</span>
+        </div>
+
+        <div id="pdf-error">
+          <div class="error-icon">⚠️</div>
+          <div class="error-title">Could not load this file</div>
+          <div class="error-file" id="error-filename"></div>
+        </div>
+
+        <div id="pdf-scroll"></div>
+      </main>
+    </div>
+
+    <div class="bottom-nav" id="bottom-nav">
+      <button class="nav-btn" id="btn-prev" onclick="navigate(-1)">
+        ← Prev
+      </button>
+      <span class="nav-doc-label" id="nav-label"></span>
+      <button class="nav-btn" id="btn-next" onclick="navigate(1)">
+        Next →
+      </button>
+    </div>
+
+    <script>
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+      // ── UPDATE THESE FILE NAMES to match your actual PDF filenames ──
+      const docs = [
+        { label: "Chapter 1", file: "EOD 00.pdf" },
+        { label: "Chapter 2", file: "EOD 01.pdf" },
+        { label: "Chapter 3", file: "EOD 02.pdf" },
+        { label: "Chapter 4", file: "EOD 03.pdf" },
+        { label: "Chapter 4", file: "EOD 04.pdf" },
+        { label: "Chapter 6", file: "EOD 05.pdf" },
+      ];
+
+      let currentIndex = 0;
+      let currentPdfDoc = null;
+
+      // Build sidebar
+      const list = document.getElementById("doc-list");
+      docs.forEach((doc, i) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+                <span class="doc-num">${String(i + 1).padStart(2, "0")}</span>
+                <button onclick="loadDoc(${i})">
+                  <span class="doc-icon">◈</span>
+                  <span>${doc.label}</span>
+                </button>
+              `;
+        list.appendChild(li);
+      });
+
+      function showState(state) {
+        document.getElementById("pdf-loading").style.display =
+          state === "loading" ? "flex" : "none";
+        document.getElementById("pdf-error").style.display =
+          state === "error" ? "flex" : "none";
+        document.getElementById("pdf-scroll").style.display =
+          state === "pdf" ? "flex" : "none";
+      }
+
+      function updateBottomNav() {
+        document.getElementById("nav-label").textContent =
+          `${currentIndex + 1} / ${docs.length}`;
+        document.getElementById("btn-prev").disabled = currentIndex === 0;
+        document.getElementById("btn-next").disabled =
+          currentIndex === docs.length - 1;
+      }
+
+      function navigate(dir) {
+        const next = currentIndex + dir;
+        if (next >= 0 && next < docs.length) loadDoc(next);
+      }
+
+      async function loadDoc(index) {
+        currentIndex = index;
+        const doc = docs[index];
+
+        document.querySelectorAll("#doc-list li").forEach((li, i) => {
+          li.classList.toggle("active", i === index);
+        });
+
+        const activeLi = document.querySelector("#doc-list li.active");
+        if (activeLi) activeLi.scrollIntoView({ block: "nearest" });
+
+        document.getElementById("viewer-title").textContent = doc.label;
+        document.getElementById("page-info").textContent = "";
+        updateBottomNav();
+        showState("loading");
+
+        if (currentPdfDoc) {
+          currentPdfDoc.destroy();
+          currentPdfDoc = null;
+        }
+
+        const scrollEl = document.getElementById("pdf-scroll");
+        scrollEl.innerHTML = "";
+        scrollEl.scrollTop = 0;
+
+        try {
+          const loadingTask = pdfjsLib.getDocument({
+            url: "pdfs/" + doc.file,
+            cMapUrl:
+              "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/cmaps/",
+            cMapPacked: true,
+          });
+
+          const pdfDoc = await loadingTask.promise;
+          currentPdfDoc = pdfDoc;
+
+          const totalPages = pdfDoc.numPages;
+          document.getElementById("page-info").textContent =
+            `${totalPages} page${totalPages > 1 ? "s" : ""}`;
+
+          showState("pdf");
+
+          for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+            const page = await pdfDoc.getPage(pageNum);
+
+            const containerWidth =
+              document.querySelector("main").clientWidth - 32;
+            const naturalViewport = page.getViewport({ scale: 1 });
+            const scale = Math.min(containerWidth / naturalViewport.width, 2.0);
+            const viewport = page.getViewport({ scale });
+
+            const canvas = document.createElement("canvas");
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = viewport.width * dpr;
+            canvas.height = viewport.height * dpr;
+            canvas.style.width = viewport.width + "px";
+            canvas.style.height = viewport.height + "px";
+            scrollEl.appendChild(canvas);
+
+            const ctx = canvas.getContext("2d");
+            ctx.scale(dpr, dpr);
+            await page.render({ canvasContext: ctx, viewport }).promise;
+          }
+        } catch (err) {
+          console.error("Failed to load:", doc.file, err);
+          document.getElementById("error-filename").textContent =
+            "pdfs/" + doc.file;
+          showState("error");
+        }
+
+        closeSidebar();
+      }
+
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        const overlay = document.getElementById("sidebar-overlay");
+        const isOpen = sidebar.classList.contains("open");
+        if (isOpen) {
+          sidebar.classList.remove("open");
+          overlay.classList.remove("visible");
+        } else {
+          sidebar.classList.add("open");
+          overlay.classList.add("visible");
+        }
+      }
+
+      function closeSidebar() {
+        if (window.innerWidth <= 768) {
+          document.getElementById("sidebar").classList.remove("open");
+          document
+            .getElementById("sidebar-overlay")
+            .classList.remove("visible");
+        }
+      }
+
+      let resizeTimer;
+      window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => loadDoc(currentIndex), 300);
+      });
+
+      window.addEventListener("load", () => loadDoc(0));
+    </script>
+  </body>
+</html>
